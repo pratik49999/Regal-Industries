@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Regal Industries - Invoicing & Delivery Challan</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f5f5f7;
+      --surface-border: #d2d2d7;
+      --text: #1d1d1f;
+      --text-muted: #86868b;
+      --accent: #000000;
+      --accent-hover: #333333;
+      --border-doc: #000000;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif;
+      --font-num: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--surface);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .num-font {
+      font-family: var(--font-num) !important;
+      font-feature-settings: "tnum" 1, "lnum" 1;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--surface-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: rgba(118, 118, 128, 0.12);
+      padding: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    .nav-tab {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-tab.active {
+      background: #ffffff;
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Main Container Layout */
+    .app-body {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    @media (max-width: 900px) {
+      .app-body {
+        grid-template-columns: 1fr;
+        padding: 12px;
+        gap: 16px;
+      }
+    }
+
+    /* Form Panel Card */
+    .panel-card {
+      background: #ffffff;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+      height: fit-content;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease;
+      background: #fafafa;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #000000;
+      background: #ffffff;
+    }
+
+    /* Action Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      gap: 6px;
+    }
+
+    .btn-dark {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-dark:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      border-color: var(--surface-border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      background: var(--surface);
+    }
+
+    /* Document Preview Container */
+    .preview-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .preview-toolbar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--surface-border);
+    }
+
+    /* Standard Document Rendering (Strict Black & White) */
+    .doc-page {
+      background: #ffffff;
+      color: #000000;
+      border: 1px solid #000000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      margin: 0 auto;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    /* Tax Invoice - A4 Standard */
+    .invoice-a4 {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 14mm 16mm;
+      font-size: 11.5px;
+      line-height: 1.35;
+    }
+
+    /* Delivery Challan - A5 Standard */
+    .challan-a5 {
+      width: 148mm;
+      min-height: 210mm;
+      padding: 10mm 12mm;
+      font-size: 10px;
+      line-height: 1.3;
+    }
+
+    @media (max-width: 900px) {
+      .doc-page {
+        width: 100% !important;
+        min-height: auto !important;
+        padding: 14px !important;
+      }
+    }
+
+    /* Document Layout Structure */
+    .doc-table-box {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000000;
+      margin-bottom: -1px;
+    }
+
+    .doc-table-box td, .doc-table-box th {
+      border: 1px solid #000000;
+      padding: 4px 6px;
+      vertical-align: top;
+    }
+
+    .doc-title-h1 {
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #000000;
+      padding: 4px 0;
+      margin-bottom: -1px;
+    }
+
+    .company-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .doc-grid-header {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      border: 1px solid #000000;
+      margin-bottom: -1px;
+    }
+
+    .doc-grid-cell {
+      padding: 6px 8px;
+    }
+
+    .doc-grid-cell:first-child {
+      border-right: 1px solid #000000;
+    }
+
+    /* Line Items Table */
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000000;
+      margin-bottom: -1px;
+    }
+
+    .items-table th {
+      border: 1px solid #000000;
+      padding: 5px 6px;
+      font-weight: 700;
+      background: #ffffff;
+      text-align: left;
+    }
+
+    .items-table td {
+      border-right: 1px solid #000000;
+      border-left: 1px solid #000000;
+      border-top: none;
+      border-bottom: none;
+      padding: 4px 6px;
+      vertical-align: top;
+    }
+
+    .items-table .row-tax td {
+      border-top: 1px solid #000000;
+      padding: 3px 6px;
+    }
+
+    .items-table .row-total td {
+      border-top: 1px solid #000000;
+      border-bottom: 1px solid #000000;
+      font-weight: 700;
+      padding: 5px 6px;
+    }
+
+    .tax-italic {
+      font-style: italic;
+    }
+
+    /* Print Stylesheets */
+    @media print {
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+      header, .panel-card, .preview-toolbar, .nav-tabs {
+        display: none !important;
+      }
+      .app-body {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+      }
+      .preview-container {
+        display: block !important;
+      }
+      .doc-page {
+        border: 1px solid #000000 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+        margin: 0 !important;
+      }
+      .invoice-a4 {
+        width: 100% !important;
+        min-height: 100% !important;
+        padding: 10mm 12mm !important;
+      }
+      .challan-a5 {
+        width: 100% !important;
+        min-height: 100% !important;
+        padding: 8mm 10mm !important;
+      }
+      @page {
+        margin: 8mm 10mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-title">Regal Industries</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-btn-inv" onclick="switchDocTab('INVOICE')">Tax Invoice (A4)</button>
+      <button class="nav-tab" id="tab-btn-dc" onclick="switchDocTab('CHALLAN')">Delivery Challan (A5)</button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <!-- Input Form Panel -->
+    <div class="panel-card">
+      <div class="card-title">
+        <span>Order & Billing Entry</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Invoice No-</label>
+          <input type="text" id="inp-invoice-no" class="num-font" value="041">
+        </div>
+        <div class="form-group">
+          <label>Dated-</label>
+          <input type="text" id="inp-date" class="num-font">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>DC No-</label>
+          <input type="text" id="inp-dc-no" class="num-font" value="DC/26-27/023">
+        </div>
+        <div class="form-group">
+          <label>Order No-</label>
+          <input type="text" id="inp-order-no" class="num-font" value="REG-26-27/381">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Consignee / Client Name</label>
+        <input type="text" id="inp-client-name" placeholder="e.g. Akash Nimbalkar" oninput="renderDocs()">
+      </div>
+
+      <div class="form-group">
+        <label>Consignee Address</label>
+        <textarea id="inp-client-address" rows="2" placeholder="Street, City, State, PIN" oninput="renderDocs()"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Consignee GSTIN</label>
+          <input type="text" id="inp-client-gstin" class="num-font" placeholder="22AASCA1150A1ZD" oninput="renderDocs()">
+        </div>
+        <div class="form-group">
+          <label>Vehicle No-</label>
+          <input type="text" id="inp-vehicle-no" class="num-font" placeholder="MH 11 XX 0000" oninput="renderDocs()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Receiver's Name-</label>
+          <input type="text" id="inp-receiver-name" placeholder="e.g. Sitaram Wadkar" oninput="renderDocs()">
+        </div>
+        <div class="form-group">
+          <label>Delivered at-</label>
+          <input type="text" id="inp-delivered-at" placeholder="Company" value="Company" oninput="renderDocs()">
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid var(--surface-border); padding-top: 10px;">
+        <label style="font-size: 12px; font-weight: 600;">Product Line Item</label>
+      </div>
+
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" id="inp-item-name" value="Single Layer Punnet (250g)" oninput="renderDocs()">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantity</label>
+          <input type="number" id="inp-item-qty" class="num-font" value="1" oninput="renderDocs()">
+        </div>
+        <div class="form-group">
+          <label>Per (Unit)</label>
+          <input type="text" id="inp-item-per" value="Box" oninput="renderDocs()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Rate (₹)</label>
+          <input type="number" step="0.01" id="inp-item-rate" class="num-font" value="1500" oninput="renderDocs()">
+        </div>
+        <div class="form-group">
+          <label>HSN/SAC</label>
+          <input type="text" id="inp-hsn" class="num-font" value="39206220" oninput="renderDocs()">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Google Apps Script Web App URL (Sales Register Sync)</label>
+        <input type="text" id="inp-sync-url" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button class="btn btn-dark" style="flex: 1;" onclick="logAndNext()">Log & Next</button>
+      </div>
+    </div>
+
+    <!-- Live Document Preview Section -->
+    <div class="preview-container">
+      <div class="preview-toolbar">
+        <div style="font-weight: 500;" id="preview-mode-title">Tax Invoice Preview</div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" onclick="window.print()">Print / PDF</button>
+        </div>
+      </div>
+
+      <!-- TAX INVOICE (A4) -->
+      <div id="doc-invoice-view" class="doc-page invoice-a4">
+        <div class="doc-title-h1">TAX INVOICE</div>
+        
+        <div class="doc-grid-header">
+          <div class="doc-grid-cell">
+            <div class="company-name">Regal Industries</div>
+            <div>Plot No-B 61, MIDC Wai, Tal- Wai</div>
+            <div>Dist- Satara, 412803</div>
+            <div>GSTIN/UIN- <span class="num-font">27ACDPW0171F1ZO</span></div>
+          </div>
+          <div class="doc-grid-cell" style="padding: 0;">
+            <table style="width: 100%; height: 100%; border-collapse: collapse;">
+              <tr style="border-bottom: 1px solid #000000;">
+                <td style="padding: 4px 6px; width: 45%;">Invoice No-</td>
+                <td style="padding: 4px 6px; font-weight: 700;" class="num-font" id="doc-inv-no">041</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #000000;">
+                <td style="padding: 4px 6px;">Dated-</td>
+                <td style="padding: 4px 6px;" class="num-font" id="doc-inv-date"></td>
+              </tr>
+              <tr>
+                <td style="padding: 4px 6px;">HSN/SAC-</td>
+                <td style="padding: 4px 6px;" class="num-font" id="doc-inv-hsn">39206220</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="doc-table-box" style="padding: 6px 8px;">
+          <div><strong>Consignee-</strong></div>
+          <div id="doc-inv-client-name" style="font-weight: 600;"></div>
+          <div id="doc-inv-client-address"></div>
+          <div>GSTIN: <span class="num-font" id="doc-inv-client-gstin"></span></div>
+        </div>
+
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width: 45px; text-align: center;">Sr. No.</th>
+              <th>Product Name</th>
+              <th style="width: 60px; text-align: center;">Qty</th>
+              <th style="width: 75px; text-align: right;">Rate</th>
+              <th style="width: 50px; text-align: center;">Per</th>
+              <th style="width: 95px; text-align: right;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="height: 120px;">
+              <td style="text-align: center;" class="num-font">1.</td>
+              <td id="doc-inv-item-name"></td>
+              <td style="text-align: center;" class="num-font" id="doc-inv-item-qty"></td>
+              <td style="text-align: right;" class="num-font" id="doc-inv-item-rate"></td>
+              <td style="text-align: center;" id="doc-inv-item-per"></td>
+              <td style="text-align: right;" class="num-font" id="doc-inv-item-amt"></td>
+            </tr>
+            <tr class="row-tax">
+              <td></td>
+              <td class="tax-italic">CGST @</td>
+              <td></td>
+              <td style="text-align: right;" class="num-font">9</td>
+              <td style="text-align: center;" class="num-font">%</td>
+              <td style="text-align: right;" class="num-font" id="doc-inv-cgst-amt"></td>
+            </tr>
+            <tr class="row-tax">
+              <td></td>
+              <td class="tax-italic">SGST @</td>
+              <td></td>
+              <td style="text-align: right;" class="num-font">9</td>
+              <td style="text-align: center;" class="num-font">%</td>
+              <td style="text-align: right;" class="num-font" id="doc-inv-sgst-amt"></td>
+            </tr>
+            <tr class="row-total">
+              <td></td>
+              <td>Total</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td style="text-align: right;" class="num-font" id="doc-inv-grand-total"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="doc-table-box" style="padding: 6px 8px;">
+          <div>Amount in words-</div>
+          <div id="doc-inv-words" style="font-weight: 600; text-transform: capitalize; margin-top: 2px;"></div>
+        </div>
+
+        <div class="doc-grid-header">
+          <div class="doc-grid-cell">
+            <div style="font-weight: 700; margin-bottom: 2px;">Company Bank Details-</div>
+            <div>Bank Name- Axis Bank</div>
+            <div>A/C No- <span class="num-font">921020012265974</span></div>
+            <div>Branch- Wai</div>
+            <div>IFS Code- <span class="num-font">UTIB0001438</span></div>
+          </div>
+          <div class="doc-grid-cell" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="font-weight: 700;">Declaration-</div>
+              <div style="font-size: 10px;">We declare that this invoice shows the actual price of the described and that all particulars are true and correct.</div>
+            </div>
+            <div style="text-align: right; margin-top: 15px;">
+              <div id="doc-inv-for-sign" style="font-weight: 600;">For Regal Industries 26-27</div>
+              <div style="margin-top: 20px;">Authorized Signatory</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: center; font-weight: 700; font-size: 11px; padding: 6px 0;">
+          SUBJECT TO WAI JURISDICTION
+        </div>
+      </div>
+
+      <!-- DELIVERY CHALLAN (A5) -->
+      <div id="doc-challan-view" class="doc-page challan-a5" style="display: none;">
+        <div class="doc-title-h1" style="font-size: 13px;">DELIVERY CHALLAN</div>
+
+        <div class="doc-grid-header">
+          <div class="doc-grid-cell">
+            <div>DC No- <span class="num-font" style="font-weight: 700;" id="doc-dc-no">DC/26-27/023</span></div>
+            <div>Order No- <span class="num-font" id="doc-dc-order-no">REG-26-27/381</span></div>
+          </div>
+          <div class="doc-grid-cell">
+            <div>Date- <span class="num-font" id="doc-dc-date"></span></div>
+            <div>Vehicle No- <span class="num-font" id="doc-dc-vehicle-no"></span></div>
+          </div>
+        </div>
+
+        <div class="doc-grid-header">
+          <div class="doc-grid-cell">
+            <div class="company-name" style="font-size: 12px;">Regal Industries</div>
+            <div>Plot No- B61, MIDC Wai,</div>
+            <div>Tal- Wai,</div>
+            <div>District- Satara, 412803</div>
+          </div>
+          <div class="doc-grid-cell">
+            <div><strong>Consignee-</strong></div>
+            <div id="doc-dc-client-name" style="font-weight: 600;"></div>
+            <div style="margin-top: 4px;">Delivered at- <span id="doc-dc-delivered-at">Company</span></div>
+          </div>
+        </div>
+
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width: 45px; text-align: center;">Sr. No.</th>
+              <th>Product Name</th>
+              <th style="width: 90px; text-align: center;">Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="height: 100px;">
+              <td style="text-align: center;" class="num-font">1</td>
+              <td id="doc-dc-item-name"></td>
+              <td style="text-align: center;" class="num-font" id="doc-dc-item-qty"></td>
+            </tr>
+            <tr class="row-total">
+              <td></td>
+              <td>Total</td>
+              <td style="text-align: center;" class="num-font" id="doc-dc-total-qty"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="doc-grid-header" style="min-height: 85px;">
+          <div class="doc-grid-cell" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>Receiver's Name- <span id="doc-dc-receiver-name"></span></div>
+            <div>Receiver's Signature</div>
+          </div>
+          <div class="doc-grid-cell" style="display: flex; flex-direction: column; justify-content: space-between; text-align: right;">
+            <div style="font-weight: 700;">REGAL INDUSTRIES</div>
+            <div>Authorised Signatory</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State initialization
+    let currentDocTab = 'INVOICE';
+
+    function getFYString() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1; // 1-indexed
+      let startYear = (month >= 4) ? year : year - 1;
+      let endYear = startYear + 1;
+      return `${String(startYear).slice(-2)}-${String(endYear).slice(-2)}`;
+    }
+
+    function initDefaults() {
+      // Set current date in D/M/YYYY or D-M-YYYY format
+      const now = new Date();
+      const d = now.getDate();
+      const m = now.getMonth() + 1;
+      const y = now.getFullYear();
+      const formattedDate = `${m}/${d}/${y}`; // Matches Sales Register format
+      document.getElementById('inp-date').value = formattedDate;
+
+      // Load persistent state if present
+      const savedInv = localStorage.getItem('regal_inv_seq') || '041';
+      const savedDC = localStorage.getItem('regal_dc_seq') || '023';
+      const savedOrder = localStorage.getItem('regal_order_seq') || '381';
+      const savedSyncUrl = localStorage.getItem('regal_sync_url') || '';
+
+      const fy = getFYString();
+      document.getElementById('inp-invoice-no').value = savedInv;
+      document.getElementById('inp-dc-no').value = `DC/${fy}/${savedDC}`;
+      document.getElementById('inp-order-no').value = `REG-${fy}/${savedOrder}`;
+      if (savedSyncUrl) document.getElementById('inp-sync-url').value = savedSyncUrl;
+
+      renderDocs();
+    }
+
+    function switchDocTab(type) {
+      currentDocTab = type;
+      if (type === 'INVOICE') {
+        document.getElementById('tab-btn-inv').classList.add('active');
+        document.getElementById('tab-btn-dc').classList.remove('active');
+        document.getElementById('doc-invoice-view').style.display = 'block';
+        document.getElementById('doc-challan-view').style.display = 'none';
+        document.getElementById('preview-mode-title').innerText = 'Tax Invoice Preview (A4)';
+      } else {
+        document.getElementById('tab-btn-dc').classList.add('active');
+        document.getElementById('tab-btn-inv').classList.remove('active');
+        document.getElementById('doc-challan-view').style.display = 'block';
+        document.getElementById('doc-invoice-view').style.display = 'none';
+        document.getElementById('preview-mode-title').innerText = 'Delivery Challan Preview (A5)';
+      }
+    }
+
+    function numberToWords(num) {
+      const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+      const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+      function inWords(n) {
+        if ((n = n.toString()).length > 9) return 'Overflow';
+        let n_array = ('000000000' + n).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n_array) return '';
+        let str = '';
+        str += (n_array[1] != 0) ? (a[Number(n_array[1])] || b[n_array[1][0]] + ' ' + a[n_array[1][1]]) + 'Crore ' : '';
+        str += (n_array[2] != 0) ? (a[Number(n_array[2])] || b[n_array[2][0]] + ' ' + a[n_array[2][1]]) + 'Lakh ' : '';
+        str += (n_array[3] != 0) ? (a[Number(n_array[3])] || b[n_array[3][0]] + ' ' + a[n_array[3][1]]) + 'Thousand ' : '';
+        str += (n_array[4] != 0) ? (a[Number(n_array[4])] || b[n_array[4][0]] + ' ' + a[n_array[4][1]]) + 'Hundred ' : '';
+        str += (n_array[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n_array[5])] || b[n_array[5][0]] + ' ' + a[n_array[5][1]]) : '';
+        return str;
+      }
+
+      num = Math.round(num);
+      if (num === 0) return 'Zero Only';
+      return (inWords(num).trim() + ' Only');
+    }
+
+    function renderDocs() {
+      const invNo = document.getElementById('inp-invoice-no').value;
+      const dateVal = document.getElementById('inp-date').value;
+      const dcNo = document.getElementById('inp-dc-no').value;
+      const orderNo = document.getElementById('inp-order-no').value;
+      const clientName = document.getElementById('inp-client-name').value;
+      const clientAddress = document.getElementById('inp-client-address').value;
+      const clientGSTIN = document.getElementById('inp-client-gstin').value;
+      const vehicleNo = document.getElementById('inp-vehicle-no').value;
+      const receiverName = document.getElementById('inp-receiver-name').value;
+      const deliveredAt = document.getElementById('inp-delivered-at').value;
+
+      const itemName = document.getElementById('inp-item-name').value;
+      const itemQty = parseFloat(document.getElementById('inp-item-qty').value) || 0;
+      const itemPer = document.getElementById('inp-item-per').value;
+      const itemRate = parseFloat(document.getElementById('inp-item-rate').value) || 0;
+      const hsn = document.getElementById('inp-hsn').value;
+
+      const lineTotal = itemQty * itemRate;
+      const cgstAmt = lineTotal * 0.09;
+      const sgstAmt = lineTotal * 0.09;
+      const grandTotal = Math.round(lineTotal + cgstAmt + sgstAmt);
+
+      // Populate Invoice Elements
+      document.getElementById('doc-inv-no').innerText = invNo;
+      document.getElementById('doc-inv-date').innerText = dateVal;
+      document.getElementById('doc-inv-hsn').innerText = hsn;
+      document.getElementById('doc-inv-client-name').innerText = clientName;
+      document.getElementById('doc-inv-client-address').innerText = clientAddress;
+      document.getElementById('doc-inv-client-gstin').innerText = clientGSTIN;
+
+      document.getElementById('doc-inv-item-name').innerText = itemName;
+      document.getElementById('doc-inv-item-qty').innerText = itemQty;
+      document.getElementById('doc-inv-item-rate').innerText = itemRate.toFixed(2);
+      document.getElementById('doc-inv-item-per').innerText = itemPer;
+      document.getElementById('doc-inv-item-amt').innerText = lineTotal.toFixed(2);
+
+      document.getElementById('doc-inv-cgst-amt').innerText = cgstAmt.toFixed(2);
+      document.getElementById('doc-inv-sgst-amt').innerText = sgstAmt.toFixed(2);
+      document.getElementById('doc-inv-grand-total').innerText = grandTotal;
+      document.getElementById('doc-inv-words').innerText = numberToWords(grandTotal);
+      document.getElementById('doc-inv-for-sign').innerText = `For Regal Industries ${getFYString()}`;
+
+      // Populate Delivery Challan Elements
+      document.getElementById('doc-dc-no').innerText = dcNo;
+      document.getElementById('doc-dc-order-no').innerText = orderNo;
+      document.getElementById('doc-dc-date').innerText = dateVal;
+      document.getElementById('doc-dc-vehicle-no').innerText = vehicleNo;
+      document.getElementById('doc-dc-client-name').innerText = clientName;
+      document.getElementById('doc-dc-delivered-at').innerText = deliveredAt;
+
+      document.getElementById('doc-dc-item-name').innerText = itemName;
+      document.getElementById('doc-dc-item-qty').innerText = `${itemQty} ${itemPer}`;
+      document.getElementById('doc-dc-total-qty').innerText = itemQty;
+      document.getElementById('doc-dc-receiver-name').innerText = receiverName;
+    }
+
+    async function logAndNext() {
+      const syncUrl = document.getElementById('inp-sync-url').value.trim();
+      if (syncUrl) {
+        localStorage.setItem('regal_sync_url', syncUrl);
+        
+        const payload = {
+          invoiceNo: document.getElementById('inp-invoice-no').value,
+          challanNo: document.getElementById('inp-dc-no').value,
+          orderNo: document.getElementById('inp-order-no').value,
+          date: document.getElementById('inp-date').value,
+          clientName: document.getElementById('inp-client-name').value,
+          receiverName: document.getElementById('inp-receiver-name').value,
+          deliveredAt: document.getElementById('inp-delivered-at').value,
+          vehicleNo: document.getElementById('inp-vehicle-no').value,
+          items: [{
+            name: document.getElementById('inp-item-name').value,
+            qty: parseFloat(document.getElementById('inp-item-qty').value) || 0,
+            rate: parseFloat(document.getElementById('inp-item-rate').value) || 0
+          }],
+          subtotal: parseFloat(document.getElementById('inp-item-qty').value) * parseFloat(document.getElementById('inp-item-rate').value)
+        };
+
+        try {
+          fetch(syncUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          alert('Entry logged successfully to Sales Register!');
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Auto-increment sequence numbers
+      let invNum = parseInt(document.getElementById('inp-invoice-no').value, 10) + 1;
+      let nextInv = String(invNum).padStart(3, '0');
+      document.getElementById('inp-invoice-no').value = nextInv;
+      localStorage.setItem('regal_inv_seq', nextInv);
+
+      // Increment Challan
+      const dcVal = document.getElementById('inp-dc-no').value;
+      const dcMatch = dcVal.match(/(\d+)$/);
+      let nextDCSeq = '024';
+      if (dcMatch) {
+        let dcNum = parseInt(dcMatch[1], 10) + 1;
+        nextDCSeq = String(dcNum).padStart(3, '0');
+      }
+      const fy = getFYString();
+      document.getElementById('inp-dc-no').value = `DC/${fy}/${nextDCSeq}`;
+      localStorage.setItem('regal_dc_seq', nextDCSeq);
+
+      // Increment Order No
+      const ordVal = document.getElementById('inp-order-no').value;
+      const ordMatch = ordVal.match(/(\d+)$/);
+      let nextOrdSeq = '382';
+      if (ordMatch) {
+        let ordNum = parseInt(ordMatch[1], 10) + 1;
+        nextOrdSeq = String(ordNum);
+      }
+      document.getElementById('inp-order-no').value = `REG-${fy}/${nextOrdSeq}`;
+      localStorage.setItem('regal_order_seq', nextOrdSeq);
+
+      renderDocs();
+    }
+
+    window.onload = initDefaults;
+  </script>
+</body>
+</html>
